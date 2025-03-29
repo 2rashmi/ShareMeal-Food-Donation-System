@@ -20,15 +20,21 @@ const getAllDeliveries = async (req, res) => {
         const deliveries = await Delivery.find()
             .populate({
                 path: "donationId",
+                select: "foodType quantity expiryDate pickupLocation contactInfo",
                 populate: {
                     path: "donorId",
-                    select: "username"
+                    select: "username _id"
                 }
             })
-            .populate("deliveryAgentId", "username");
+            .populate({
+                path: "deliveryAgentId",
+                select: "username _id"
+            });
+        console.log("Fetched deliveries:", deliveries);
         res.status(200).json({ deliveries });
     } catch (err) {
-        res.status(500).json({ message: "Error fetching deliveries", error: err });
+        console.error("Error fetching deliveries:", err);
+        res.status(500).json({ message: "Error fetching deliveries", error: err.message });
     }
 };
 

@@ -1,5 +1,10 @@
 const Donation = require("../Models/DonationModel");
+
 const NgoClaim = require("../Models/NgoClaimModel");
+
+
+// Generate Donation Report
+
 const generateDonationReport = async (req, res) => {
     try {
         console.log("Generating donation report...");
@@ -86,5 +91,6 @@ const generateClaimsReport = async (req, res) => {
 
 
 module.exports = {
-    generateDonationReport
+    generateDonationReport,
+  generateClaimsReport
 }; 
