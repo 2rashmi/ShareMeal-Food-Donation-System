@@ -86,5 +86,6 @@ const generateClaimsReport = async (req, res) => {
 
 
 module.exports = {
-    generateDonationReport
+    generateDonationReport,
+    generateClaimsReport
 }; 
