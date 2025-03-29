@@ -3,22 +3,39 @@ const NgoClaim = require("../Models/NgoClaimModel");
 const mongoose = require("mongoose");
 
 const addDonation = async (req, res) => {
-    const { donorId, foodType, quantity, expiryDate, pickupLocation, contactInfo } = req.body;
+    const { donorId, foodType, quantity, quantityUnit, expiryDate, pickupLocation, contactInfo } = req.body;
     try {
-        const donation = new Donation({ donorId, foodType, quantity, expiryDate, pickupLocation, contactInfo });
+        const donation = new Donation({ 
+            donorId, 
+            foodType, 
+            quantity, 
+            quantityUnit,
+            expiryDate, 
+            pickupLocation, 
+            contactInfo 
+        });
         await donation.save();
         res.status(201).json({ donation });
     } catch (err) {
-        res.status(500).json({ message: "Error adding donation", error: err });
+        console.error("Error adding donation:", err);
+        res.status(500).json({ message: "Error adding donation", error: err.message });
     }
 };
 
 const getAllDonations = async (req, res) => {
     try {
-        const donations = await Donation.find().populate("donorId", "username");
+        const donations = await Donation.find()
+            .populate({
+                path: "donorId",
+                select: "username _id"
+            })
+            .select('foodType quantity quantityUnit expiryDate pickupLocation contactInfo status createdAt donorId');
+        
+        console.log("Sending donations:", donations); // Debug log
         res.status(200).json({ donations });
     } catch (err) {
-        res.status(500).json({ message: "Error fetching donations", error: err });
+        console.error("Error fetching donations:", err);
+        res.status(500).json({ message: "Error fetching donations", error: err.message });
     }
 };
 
@@ -35,7 +52,7 @@ const getDonationById = async (req, res) => {
 
 const updateDonation = async (req, res) => {
     const { id } = req.params;
-    const { status, foodType, quantity, expiryDate, pickupLocation, contactInfo } = req.body;
+    const { status, foodType, quantity, quantityUnit, expiryDate, pickupLocation, contactInfo } = req.body;
     try {
         const donation = await Donation.findById(id);
         if (!donation) return res.status(404).json({ message: "Donation not found" });
@@ -54,6 +71,7 @@ const updateDonation = async (req, res) => {
         // Handle other field updates
         if (foodType) donation.foodType = foodType;
         if (quantity) donation.quantity = quantity;
+        if (quantityUnit) donation.quantityUnit = quantityUnit;
         if (expiryDate) donation.expiryDate = expiryDate;
         if (pickupLocation) donation.pickupLocation = pickupLocation;
         if (contactInfo) donation.contactInfo = contactInfo;
@@ -61,7 +79,8 @@ const updateDonation = async (req, res) => {
         await donation.save();
         res.status(200).json({ donation });
     } catch (err) {
-        res.status(500).json({ message: "Error updating donation", error: err });
+        console.error("Error updating donation:", err);
+        res.status(500).json({ message: "Error updating donation", error: err.message });
     }
 };
 
