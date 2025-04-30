@@ -118,10 +118,46 @@ const generateDeliveryReport = async (req, res) => {
         res.status(500).json({ message: "Error generating delivery report", error: err.message });
     }
 };
+const generateUserReport = async (req, res) => {
+    try {
+        console.log("Generating user report...");
+        const users = await User.find({}, '-password');
+        console.log(`Found ${users.length} users`);
+        
+        const report = {
+            totalUsers: users.length,
+            usersByRole: {
+                Admin: users.filter(u => u.role === "Admin").length,
+                Donor: users.filter(u => u.role === "Donor").length,
+                NGO: users.filter(u => u.role === "NGO").length,
+                DeliveryAgent: users.filter(u => u.role === "DeliveryAgent").length
+            },
+            usersByStatus: {
+                Approved: users.filter(u => u.approved).length,
+                Pending: users.filter(u => !u.approved).length
+            },
+            recentUsers: users.slice(-5).map(u => ({
+                id: u._id,
+                username: u.username,
+                role: u.role,
+                email: u.email,
+                approved: u.approved,
+                date: u.createdAt
+            }))
+        };
+
+        console.log("User report generated successfully");
+        res.status(200).json(report);
+    } catch (err) {
+        console.error("Error generating user report:", err);
+        res.status(500).json({ message: "Error generating user report", error: err.message });
+    }
+};
 
 
 module.exports = {
     generateDonationReport,
     generateClaimsReport,
-    generateDeliveryReport
+    generateDeliveryReport,
+    generateUserReport
 }; 

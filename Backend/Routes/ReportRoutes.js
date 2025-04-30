@@ -6,5 +6,7 @@ const ReportController = require("../Controllers/ReportController");
 router.get("/donations", ReportController.generateDonationReport);
 //delivery route
 router.get("/deliveries", ReportController.generateDeliveryReport);
+//user route
+router.get("/users", ReportController.generateUserReport);
 
 module.exports = router;
