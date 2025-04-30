@@ -2,7 +2,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require('dotenv').config();
-
+const userRoutes = require("./Routes/UserRoutes");
+const donationRoutes = require("./Routes/DonationRoutes");
+const ngoClaimRoutes = require("./Routes/NgoClaimRoutes");
 const deliveryRoutes = require("./Routes/DeliveryRoutes");
 const reportRoutes = require("./Routes/ReportRoutes");
 
@@ -17,7 +19,9 @@ app.use(cors({
 }));
 
 // Routes
-
+app.use("/users", userRoutes);
+app.use("/donations", donationRoutes);
+app.use("/claims", ngoClaimRoutes);
 app.use("/deliveries", deliveryRoutes);
 app.use("/reports", reportRoutes);
 
