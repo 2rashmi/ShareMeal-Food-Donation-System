@@ -1,0 +1,236 @@
+/* AdminDonations.css */
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+/* Status counts section */
+.status-counts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.count-box {
+    background: white;
+    border-radius: 10px;
+    padding: 15px 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    min-width: 120px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.count-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.count-box h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #7f8c8d;
+    font-weight: 500;
+}
+
+.count-box p {
+    margin: 10px 0 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+/* Filter section */
+.filter-section {
+    margin: 25px 0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.status-filter {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: white;
+    font-size: 16px;
+    color: #34495e;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.status-filter:hover {
+    border-color: #3498db;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+}
+
+.status-filter:focus {
+    outline: none;
+    border-color: #2980b9;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+/* Donation cards */
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-left: 4px solid #3498db;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.card p {
+    margin: 8px 0;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Status badges */
+.status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status.Pending {
+    background-color: #f39c12;
+    color: white;
+}
+
+.status.Approved {
+    background-color: #27ae60;
+    color: white;
+}
+
+.status.Rejected {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.status.Claimed {
+    background-color: #9b59b6;
+    color: white;
+}
+
+.status.Assigned {
+    background-color: #3498db;
+    color: white;
+}
+
+.status.InProgress {
+    background-color: #f1c40f;
+    color: white;
+}
+
+.status.Delivered {
+    background-color: #2ecc71;
+    color: white;
+}
+
+/* Action buttons */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-success {
+    background-color: #27ae60;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #219653;
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .status-counts {
+        gap: 10px;
+    }
+    
+    .count-box {
+        min-width: 100px;
+        padding: 12px 15px;
+    }
+    
+    .card {
+        padding: 15px;
+    }
+    
+    .filter-section {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .status-counts {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .count-box {
+        width: 80%;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+}
