@@ -1,6 +1,8 @@
 const Donation = require("../Models/DonationModel");
 const NgoClaim = require("../Models/NgoClaimModel");
 const mongoose = require("mongoose");
+const { User } = require("../Models/UserModel");
+const sendEmail = require("../utils/email");
 
 const addDonation = async (req, res) => {
     const { donorId, foodType, quantity, quantityUnit, expiryDate, pickupLocation, contactInfo } = req.body;
@@ -57,6 +59,7 @@ const updateDonation = async (req, res) => {
         const donation = await Donation.findById(id);
         if (!donation) return res.status(404).json({ message: "Donation not found" });
 
+        let statusChanged = false;
         // Handle status updates (approval/rejection)
         if (status) {
             if (donation.status === "Claimed" || donation.status === "Assigned" || donation.status === "InProgress" || donation.status === "Delivered") {
@@ -65,7 +68,10 @@ const updateDonation = async (req, res) => {
             if (!["Approved", "Rejected", "Pending", "Claimed", "Assigned", "InProgress", "Delivered"].includes(status)) {
                 return res.status(400).json({ message: "Invalid status" });
             }
-            donation.status = status;
+            if (donation.status !== status) {
+                donation.status = status;
+                statusChanged = true;
+            }
         }
 
         // Handle other field updates
@@ -77,6 +83,18 @@ const updateDonation = async (req, res) => {
         if (contactInfo) donation.contactInfo = contactInfo;
 
         await donation.save();
+
+        // Send email if status changed
+        if (statusChanged) {
+            // Find donor's email
+            const donor = await User.findById(donation.donorId);
+            if (donor && donor.email) {
+                let subject = 'Donation Status Update';
+                let message = `Your donation status has been updated to: ${donation.status}`;
+                await sendEmail(donor.email, subject, message);
+            }
+        }
+
         res.status(200).json({ donation });
     } catch (err) {
         console.error("Error updating donation:", err);
