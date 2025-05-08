@@ -7,7 +7,7 @@ function Home() {
         <div className="home-container">
             {/* Hero Section */}
             <section className="hero-section">
-                <div className="hero-content"
+                <div className="hero-content">
                     <h1>Food Donation Management System</h1>
                     <p>Connecting donors with NGOs to reduce food waste and help those in need</p>
 
