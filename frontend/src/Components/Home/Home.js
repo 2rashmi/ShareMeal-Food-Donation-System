@@ -10,12 +10,6 @@ function Home() {
                 <div className="hero-content">
                     <h1>Food Donation Management System</h1>
                     <p>Connecting donors with NGOs to reduce food waste and help those in need</p>
-
-                    <h1>ShareMeal</h1>
-                 
-                    <h2>Connecting donors with NGOs to reduce food waste and help those in need</h2>
-                   
-
                     <div className="hero-buttons">
                         <Link to="/register" className="btn btn-primary">Get Started</Link>
                         <Link to="/login" className="btn btn-secondary">Login</Link>

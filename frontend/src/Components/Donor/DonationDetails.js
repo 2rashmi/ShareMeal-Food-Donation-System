@@ -16,11 +16,11 @@ function DonationDetails() {
         const fetchDonations = async () => {
             try {
                 const res = await axios.get("http://localhost:5001/donations");
-                console.log("Fetched donations:", res.data.donations);
+                console.log("Raw donation data:", res.data);
                 const userDonations = res.data.donations.filter(d => 
                     d.donorId && d.donorId._id === user.id
                 );
-                console.log("Filtered user donations:", userDonations);
+                console.log("User donations with units:", userDonations);
                 setDonations(userDonations);
                 setFilteredDonations(userDonations);
             } catch (err) {
@@ -111,9 +111,15 @@ function DonationDetails() {
                 {/* Donations Grid */}
                 <div className="donations-grid">
                     {filteredDonations.length > 0 ? (
-                        filteredDonations.map((donation, i) => (
-                            <Donation key={i} donation={donation} />
-                        ))
+                        filteredDonations.map((donation, i) => {
+                            console.log("Donation being rendered:", donation); // Debug log
+                            return (
+                                <Donation 
+                                    key={i} 
+                                    donation={donation}
+                                />
+                            );
+                        })
                     ) : (
                         <div className="no-results">
                             <div className="no-results-icon">📦</div>
