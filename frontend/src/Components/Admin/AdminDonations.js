@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Nav from "../Nav/Nav";
-import "../../App.css";
+import './AdminDonations.css';
 
 function AdminDonations() {
     const [donations, setDonations] = useState([]);
     const [filteredDonations, setFilteredDonations] = useState([]);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [foodTypeFilter, setFoodTypeFilter] = useState("all");
-    const [statusFilter, setStatusFilter] = useState("all");
+    const [statusFilter, setStatusFilter] = useState("All");
+    const [counts, setCounts] = useState({});
 
     useEffect(() => {
         const fetchDonations = async () => {
@@ -16,6 +15,13 @@ function AdminDonations() {
                 const res = await axios.get("http://localhost:5001/donations");
                 setDonations(res.data.donations);
                 setFilteredDonations(res.data.donations);
+                
+                // Calculate counts
+                const statusCounts = res.data.donations.reduce((acc, donation) => {
+                    acc[donation.status] = (acc[donation.status] || 0) + 1;
+                    return acc;
+                }, {});
+                setCounts(statusCounts);
             } catch (err) {
                 console.error("Error fetching donations:", err);
                 alert("Failed to fetch donations");
@@ -25,134 +31,102 @@ function AdminDonations() {
     }, []);
 
     useEffect(() => {
-        let filtered = [...donations];
-
-        // Apply search filter
-        if (searchTerm) {
-            filtered = filtered.filter(donation => {
-                const foodType = donation.foodType || "";
-                const donor = donation.donorId?.username || "";
-                const location = donation.pickupLocation || "";
-                return (
-                    foodType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    donor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    location.toLowerCase().includes(searchTerm.toLowerCase())
-                );
-            });
+        if (statusFilter === "All") {
+            setFilteredDonations(donations);
+        } else {
+            setFilteredDonations(donations.filter(d => d.status === statusFilter));
         }
-
-        // Apply food type filter
-        if (foodTypeFilter !== "all") {
-            filtered = filtered.filter(donation => donation.foodType === foodTypeFilter);
-        }
-
-        // Apply status filter
-        if (statusFilter !== "all") {
-            filtered = filtered.filter(donation => donation.status === statusFilter);
-        }
-
-        setFilteredDonations(filtered);
-    }, [searchTerm, foodTypeFilter, statusFilter, donations]);
+    }, [statusFilter, donations]);
 
     const handleStatusUpdate = async (id, status) => {
         try {
             await axios.put(`http://localhost:5001/donations/${id}`, { status });
-            setDonations(donations.map(d => 
+            const updatedDonations = donations.map(d => 
                 d._id === id ? { ...d, status } : d
-            ));
+            );
+            setDonations(updatedDonations);
+            
+            // Update counts
+            const newCounts = updatedDonations.reduce((acc, donation) => {
+                acc[donation.status] = (acc[donation.status] || 0) + 1;
+                return acc;
+            }, {});
+            setCounts(newCounts);
+            
             alert(`Donation ${status.toLowerCase()} successfully`);
         } catch (err) {
-            alert("Failed to update donation status: " + err.response.data.message);
+            alert("Failed to update donation status: " + err.response?.data?.message);
         }
     };
-
-    // Get unique food types for filter
-    const foodTypes = [...new Set(donations.map(d => d.foodType))].filter(Boolean);
 
     return (
         <div className="container">
             <Nav />
             <h1>All Donations</h1>
-
-            {/* Search and Filter Section */}
-            <div className="search-filter-section">
-                <div className="search-box">
-                    <input
-                        type="text"
-                        placeholder="Search by food type, donor, or location..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="search-input"
-                    />
+            
+            {/* Status counts */}
+            <div className="status-counts">
+                <div className="count-box">
+                    <h3>Total</h3>
+                    <p>{donations.length}</p>
                 </div>
-                <div className="filter-box">
-                    <select 
-                        value={foodTypeFilter} 
-                        onChange={(e) => setFoodTypeFilter(e.target.value)}
-                        className="filter-select"
-                    >
-                        <option value="all">All Food Types</option>
-                        {foodTypes.map(type => (
-                            <option key={type} value={type}>{type}</option>
-                        ))}
-                    </select>
-                    <select 
-                        value={statusFilter} 
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="filter-select"
-                    >
-                        <option value="all">All Status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Rejected">Rejected</option>
-                        <option value="Claimed">Claimed</option>
-                        <option value="Delivered">Delivered</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* Donations Grid */}
-            <div className="donations-grid">
-                {filteredDonations.map((donation, i) => (
-                    <div key={i} className="donation-card">
-                        <div className="donation-info">
-                            <h3>{donation.foodType || 'N/A'}</h3>
-                            <p className="donation-quantity">Quantity: {donation.quantity || 'N/A'}</p>
-                            <p className="donation-expiry">Expiry: {new Date(donation.expiryDate).toLocaleDateString() || 'N/A'}</p>
-                            <p className="donation-location">Location: {donation.pickupLocation || 'N/A'}</p>
-                            <p className="donation-contact">Contact: {donation.contactInfo || 'N/A'}</p>
-                            <p className={`donation-status ${donation.status.toLowerCase()}`}>
-                                Status: {donation.status || 'N/A'}
-                            </p>
-                            <p className="donation-donor">Donor: {donation.donorId?.username || 'N/A'}</p>
-                        </div>
-                        {donation.status === "Pending" && (
-                            <div className="action-buttons">
-                                <button 
-                                    onClick={() => handleStatusUpdate(donation._id, "Approved")} 
-                                    className="btn btn-success"
-                                >
-                                    Approve
-                                </button>
-                                <button 
-                                    onClick={() => handleStatusUpdate(donation._id, "Rejected")} 
-                                    className="btn btn-danger"
-                                >
-                                    Reject
-                                </button>
-                            </div>
-                        )}
+                {Object.entries(counts).map(([status, count]) => (
+                    <div key={status} className="count-box">
+                        <h3>{status}</h3>
+                        <p>{count}</p>
                     </div>
                 ))}
             </div>
 
-            {filteredDonations.length === 0 && (
-                <div className="no-results">
-                    No donations found matching your search criteria.
+            {/* Filter dropdown */}
+            <div className="filter-section">
+                <select 
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="status-filter"
+                >
+                    <option value="All">All Status</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Claimed">Claimed</option>
+                    <option value="Assigned">Assigned</option>
+                    <option value="InProgress">In Progress</option>
+                    <option value="Delivered">Delivered</option>
+                </select>
+            </div>
+
+            {/* Donations list */}
+            {filteredDonations.map((donation, i) => (
+                <div key={i} className="card">
+                    <h3>Food Type: {donation.foodType}</h3>
+                    <p>Quantity: {donation.quantity}</p>
+                    <p>Expiry Date: {new Date(donation.expiryDate).toLocaleString()}</p>
+                    <p>Pickup Location: {donation.pickupLocation}</p>
+                    <p>Contact Info: {donation.contactInfo}</p>
+                    <p>Status: <span className={`status ${donation.status}`}>{donation.status}</span></p>
+                    <p>Donor: {donation.donorId?.username || 'N/A'}</p>
+                    {donation.status === "Pending" && (
+                        <div className="action-buttons">
+                            <button 
+                                onClick={() => handleStatusUpdate(donation._id, "Approved")} 
+                                className="btn btn-success"
+                            >
+                                Approve
+                            </button>
+                            <button 
+                                onClick={() => handleStatusUpdate(donation._id, "Rejected")} 
+                                className="btn btn-danger"
+                            >
+                                Reject
+                            </button>
+                        </div>
+                    )}
                 </div>
-            )}
+            ))}
         </div>
     );
 }
 
 export default AdminDonations; 
+

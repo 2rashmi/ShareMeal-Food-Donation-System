@@ -6,9 +6,30 @@ import "../../App.css";
 
 function UpdateDonation() {
     const [inputs, setInputs] = useState({});
-    const [errors, setErrors] = useState({});
     const { id } = useParams();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchDonation = async () => {
+            const res = await axios.get(`http://localhost:5001/donations/${id}`);
+            setInputs(res.data.donation);
+        };
+        fetchDonation();
+    }, [id]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        if (name === "expiryDate") {
+            // Simply set the value as is, without any timezone conversion
+            setInputs(prev => ({ ...prev, [name]: value }));
+        } else if (name === "foodType") {
+            // Only allow letters and spaces, with a maximum of 50 characters
+            const lettersOnly = value.replace(/[^a-zA-Z\s]/g, '').slice(0, 50);
+            setInputs(prev => ({ ...prev, [name]: lettersOnly }));
+        } else {
+            setInputs(prev => ({ ...prev, [name]: value }));
+        }
+    };
 
     // Get current date and time in local timezone
     const getCurrentDateTime = () => {
@@ -21,205 +42,78 @@ function UpdateDonation() {
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     };
 
-    // Format date for datetime-local input
-    const formatDateForInput = (dateString) => {
-        if (!dateString) return "";
-        const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-    };
-
-    // Format date for server
-    const formatDateForServer = (dateString) => {
-        if (!dateString) return null;
-        const date = new Date(dateString);
-        return date.toISOString();
-    };
-
-    const validateContactInfo = (value) => {
-        if (!value) return false;
-        const numbersOnly = value.toString().replace(/\D/g, '');
-        return numbersOnly.length === 10;
-    };
-
-    const validateExpiryDate = (date) => {
-        if (!date) return false;
-        const selectedDate = new Date(date);
-        const currentDate = new Date();
-        return selectedDate > currentDate;
-    };
-
-    useEffect(() => {
-        const fetchDonation = async () => {
-            try {
-                const res = await axios.get(`http://localhost:5001/donations/${id}`);
-                setInputs(res.data.donation);
-            } catch (err) {
-                console.error("Error fetching donation:", err);
-                alert("Failed to fetch donation details");
-                navigate("/donor");
-            }
-        };
-        fetchDonation();
-    }, [id, navigate]);
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        
-        if (name === "contactInfo") {
-            // Only allow numbers and limit to 10 digits
-            const numbersOnly = value.replace(/\D/g, '').slice(0, 10);
-            setInputs(prev => ({ ...prev, [name]: numbersOnly }));
-            if (!validateContactInfo(numbersOnly)) {
-                setErrors(prev => ({ ...prev, contactInfo: "Contact number must be exactly 10 digits" }));
-            } else {
-                setErrors(prev => ({ ...prev, contactInfo: null }));
-            }
-        } else if (name === "expiryDate") {
-            if (validateExpiryDate(value)) {
-                setInputs(prev => ({ ...prev, [name]: value }));
-                setErrors(prev => ({ ...prev, expiryDate: null }));
-            } else {
-                setErrors(prev => ({ 
-                    ...prev, 
-                    expiryDate: "Expiry date must be in the future" 
-                }));
-            }
-        } else {
-            setInputs(prev => ({ ...prev, [name]: value }));
-        }
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        if (!validateContactInfo(inputs.contactInfo)) {
-            return;
-        }
-
-        if (!validateExpiryDate(inputs.expiryDate)) {
-            return;
-        }
-
         try {
-            // Format the data before sending to server
-            const updateData = {
+            // Validate food type
+            if (!/^[a-zA-Z\s]+$/.test(inputs.foodType)) {
+                alert("Food type can only contain letters and spaces");
+                return;
+            }
+            // Convert quantity to number
+            const donationData = {
                 ...inputs,
-                expiryDate: formatDateForServer(inputs.expiryDate)
+                quantity: parseFloat(inputs.quantity)
             };
-            
-            await axios.put(`http://localhost:5001/donations/${id}`, updateData);
-            alert("Donation updated successfully!");
+            await axios.put(`http://localhost:5001/donations/${id}`, donationData);
             navigate("/donor");
         } catch (err) {
-            alert("Failed to update donation: " + err.response.data.message);
+            console.error("Error details:", err.response?.data);
+            alert("Failed to update donation: " + (err.response?.data?.message || err.message));
         }
     };
 
     return (
-        <div className="page-container">
+        <div className="container">
             <Nav />
-            <div className="content-container">
-                <div className="form-card">
-                    <div className="form-header">
-                        <h1>Update Donation</h1>
-                        <p>Update your donation details</p>
+            <h1>Update Donation</h1>
+            <form onSubmit={handleSubmit}>
+                <input type="text" name="foodType" value={inputs.foodType || ""} onChange={handleChange} required 
+                    pattern="[a-zA-Z\s]+" maxLength="50" title="Please enter only letters and spaces" /><br />
+                <div className="form-group quantity-group">
+                    <div className="quantity-inputs">
+                        <input 
+                            type="number" 
+                            name="quantity" 
+                            value={inputs.quantity || ""} 
+                            onChange={handleChange} 
+                            required 
+                            min="0.01" 
+                            step="0.01"
+                            placeholder="Enter quantity"
+                        />
+                        <select
+                            name="quantityUnit"
+                            value={inputs.quantityUnit || "kg"}
+                            onChange={handleChange}
+                            required
+                        >
+                            <option value="kg">Kilograms (kg)</option>
+                            <option value="g">Grams (g)</option>
+                            <option value="l">Liters (l)</option>
+                            <option value="ml">Milliliters (ml)</option>
+                            <option value="pcs">Pieces (pcs)</option>
+                            <option value="boxes">Boxes</option>
+                            <option value="packets">Packets</option>
+                            <option value="bottles">Bottles</option>
+                        </select>
                     </div>
-                    <form onSubmit={handleSubmit} className="donation-form">
-                        <div className="form-group">
-                            <label htmlFor="foodType">Food Type</label>
-                            <input
-                                type="text"
-                                id="foodType"
-                                name="foodType"
-                                value={inputs.foodType || ""}
-                                onChange={handleChange}
-                                required
-                                placeholder="e.g., Rice, Vegetables, Fruits"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="quantity">Quantity</label>
-                            <input
-                                type="number"
-                                id="quantity"
-                                name="quantity"
-                                value={inputs.quantity || ""}
-                                onChange={handleChange}
-                                required
-                                placeholder="Enter quantity"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="expiryDate">Expiry Date & Time</label>
-                            <input
-                                type="datetime-local"
-                                id="expiryDate"
-                                name="expiryDate"
-                                value={formatDateForInput(inputs.expiryDate)}
-                                onChange={handleChange}
-                                required
-                                min={getCurrentDateTime()}
-                            />
-                            {errors.expiryDate && (
-                                <div className="error-message">{errors.expiryDate}</div>
-                            )}
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="pickupLocation">Pickup Location</label>
-                            <input
-                                type="text"
-                                id="pickupLocation"
-                                name="pickupLocation"
-                                value={inputs.pickupLocation || ""}
-                                onChange={handleChange}
-                                required
-                                placeholder="Enter pickup address"
-                            />
-                        </div>
-                        <div className="form-group contact-input">
-                            <label htmlFor="contactInfo">Contact Number</label>
-                            <input
-                                type="tel"
-                                id="contactInfo"
-                                name="contactInfo"
-                                value={inputs.contactInfo || ""}
-                                onChange={handleChange}
-                                required
-                                placeholder="Enter 10-digit contact number"
-                                pattern="[0-9]{10}"
-                                maxLength="10"
-                            />
-                            <div className={`char-counter ${validateContactInfo(inputs.contactInfo) ? 'valid' : ''}`}>
-                                {(inputs.contactInfo || "").length}/10
-                            </div>
-                            {errors.contactInfo && (
-                                <div className="error-message">{errors.contactInfo}</div>
-                            )}
-                        </div>
-                        <div className="form-actions">
-                            <button 
-                                type="submit" 
-                                className="btn btn-primary"
-                                disabled={!validateContactInfo(inputs.contactInfo) || !validateExpiryDate(inputs.expiryDate)}
-                            >
-                                Update Donation
-                            </button>
-                            <button 
-                                type="button" 
-                                className="btn btn-secondary"
-                                onClick={() => navigate("/donor")}
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
+                    <small className="form-text text-muted">Enter the quantity and select the appropriate unit</small>
                 </div>
-            </div>
+                <input 
+                    type="datetime-local" 
+                    name="expiryDate" 
+                    value={inputs.expiryDate ? new Date(inputs.expiryDate).toISOString().slice(0, -8) : ""} 
+                    onChange={handleChange} 
+                    required
+                    min={getCurrentDateTime()}
+                    title="Please select a future date and time"
+                />
+                <small className="form-text text-muted">Select a future date and time for food expiry</small><br />
+                <input type="text" name="pickupLocation" value={inputs.pickupLocation || ""} onChange={handleChange} required /><br />
+                <input type="text" name="contactInfo" value={inputs.contactInfo || ""} onChange={handleChange} required /><br />
+                <button type="submit">Update</button>
+            </form>
         </div>
     );
 }
