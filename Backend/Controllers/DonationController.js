@@ -91,7 +91,15 @@ const updateDonation = async (req, res) => {
             if (donor && donor.email) {
                 let subject = 'Donation Status Update';
                 let message = `Your donation status has been updated to: ${donation.status}`;
-                await sendEmail(donor.email, subject, message);
+                console.log(`Attempting to send email to: ${donor.email}`);
+                try {
+                    await sendEmail(donor.email, subject, message);
+                    console.log('Email sent successfully');
+                } catch (emailErr) {
+                    console.error('Failed to send email:', emailErr);
+                }
+            } else {
+                console.log('No donor email found for donation:', donation._id);
             }
         }
 
