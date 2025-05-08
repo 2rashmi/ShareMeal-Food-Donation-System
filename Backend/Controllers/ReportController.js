@@ -1,6 +1,9 @@
 const Donation = require("../Models/DonationModel");
+const NgoClaim = require("../Models/NgoClaimModel");
+const Delivery = require("../Models/DeliveryModel");
+const { User } = require("../Models/UserModel");
 
-
+// Generate Donation Report
 const generateDonationReport = async (req, res) => {
     try {
         console.log("Generating donation report...");
@@ -44,6 +47,8 @@ const generateDonationReport = async (req, res) => {
         res.status(500).json({ message: "Error generating donation report", error: err.message });
     }
 };
+
+// Generate NGO Claims Report
 const generateClaimsReport = async (req, res) => {
     try {
         console.log("Generating claims report...");
@@ -118,6 +123,8 @@ const generateDeliveryReport = async (req, res) => {
         res.status(500).json({ message: "Error generating delivery report", error: err.message });
     }
 };
+
+// Generate User Statistics Report
 const generateUserReport = async (req, res) => {
     try {
         console.log("Generating user report...");
@@ -153,7 +160,6 @@ const generateUserReport = async (req, res) => {
         res.status(500).json({ message: "Error generating user report", error: err.message });
     }
 };
-
 
 module.exports = {
     generateDonationReport,
