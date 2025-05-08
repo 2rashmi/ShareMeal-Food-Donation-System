@@ -76,6 +76,10 @@ function Donation({ donation }) {
                         {new Date(donation.expiryDate).toLocaleDateString()}
                     </span>
                 </div>
+                <div className="detail-item">
+                    <span className="detail-label">Contact</span>
+                    <span className="detail-value">{donation.contactInfo}</span>
+                </div>
             </div>
             <div className="donation-actions">
                 {donation.status === "Pending" && (
