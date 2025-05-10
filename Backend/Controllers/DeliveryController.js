@@ -2,11 +2,16 @@ const Delivery = require("../Models/DeliveryModel");
 const Donation = require("../Models/DonationModel");
 
 const assignDelivery = async (req, res) => {
-    const { donationId, deliveryAgentId } = req.body;
+    const { donationId, deliveryAgentId, pickupLocation, destinationAddress } = req.body;
     try {
         const donation = await Donation.findById(donationId);
         if (donation.status !== "Claimed") return res.status(403).json({ message: "Donation not claimed yet" });
-        const delivery = new Delivery({ donationId, deliveryAgentId });
+        const delivery = new Delivery({ 
+            donationId, 
+            deliveryAgentId,
+            pickupLocation,
+            destinationAddress
+        });
         await delivery.save();
         await Donation.findByIdAndUpdate(donationId, { status: "Assigned" });
         res.status(201).json({ delivery });

@@ -4,7 +4,7 @@ import axios from "axios";
 import "../../App.css";
 
 function Delivery({ delivery }) {
-    const { _id, donationId, pickupTime, deliveryTime, status } = delivery;
+    const { _id, donationId, pickupLocation, destinationAddress, pickupTime, deliveryTime, status } = delivery;
     const navigate = useNavigate();
 
     const deleteHandler = async () => {
@@ -22,6 +22,16 @@ function Delivery({ delivery }) {
                 <h3>{donationId.foodType}</h3>
                 <p className="delivery-quantity">Quantity: {donationId.quantity}</p>
                 <p className="delivery-donor">Donor: {donationId.donorId.username}</p>
+                <div className="delivery-locations">
+                    <div className="location-group">
+                        <h4>Pickup Location</h4>
+                        <p>{pickupLocation}</p>
+                    </div>
+                    <div className="location-group">
+                        <h4>Destination</h4>
+                        <p>{destinationAddress}</p>
+                    </div>
+                </div>
                 <p className="delivery-pickup">
                     Pickup: {pickupTime ? new Date(pickupTime).toLocaleString() : "Not yet picked up"}
                 </p>

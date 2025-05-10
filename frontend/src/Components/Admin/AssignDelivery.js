@@ -7,7 +7,12 @@ import "../../App.css";
 function AssignDelivery() {
     const [donations, setDonations] = useState([]);
     const [deliveryAgents, setDeliveryAgents] = useState([]);
-    const [inputs, setInputs] = useState({ donationId: "", deliveryAgentId: "" });
+    const [inputs, setInputs] = useState({ 
+        donationId: "", 
+        deliveryAgentId: "",
+        pickupLocation: "",
+        destinationAddress: ""
+    });
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -46,26 +51,64 @@ function AssignDelivery() {
     return (
         <div className="container">
             <Nav />
-            <h1>Assign Delivery Agent</h1>
-            <form onSubmit={handleSubmit}>
-                <select name="donationId" onChange={handleChange} required>
-                    <option value="">Select Donation</option>
-                    {donations.map(d => (
-                        <option key={d._id} value={d._id}>
-                            {d.foodType} - {d.quantity} (Donor: {d.donorId?.username || 'Unknown'})
-                        </option>
-                    ))}
-                </select><br />
-                <select name="deliveryAgentId" onChange={handleChange} required>
-                    <option value="">Select Delivery Agent</option>
-                    {deliveryAgents.map(agent => (
-                        <option key={agent._id} value={agent._id}>
-                            {agent.username}
-                        </option>
-                    ))}
-                </select><br />
-                <button type="submit">Assign Delivery Agent</button>
-            </form>
+            <div className="assign-delivery-container">
+                <h1>Assign Delivery Agent</h1>
+                <form onSubmit={handleSubmit} className="assign-delivery-form">
+                <label>Select Donation</label>
+                    <div className="form-group">
+                        
+                        <select name="donationId" onChange={handleChange} required>
+                            <option value="">Select Donation</option>
+                            {donations.map(d => (
+                                <option key={d._id} value={d._id}>
+                                    {d.foodType} - {d.quantity} (Donor: {d.donorId?.username || 'Unknown'})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <label>Select Delivery Agent</label>
+                    
+                    <div className="form-group">
+                        
+                        <select name="deliveryAgentId" onChange={handleChange} required>
+                            <option value="">Select Delivery Agent</option>
+                            {deliveryAgents.map(agent => (
+                                <option key={agent._id} value={agent._id}>
+                                    {agent.username}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    
+                    <label>Pickup Location</label>
+                    <div className="form-group">
+                        
+                        <input
+                            type="text"
+                            name="pickupLocation"
+                            value={inputs.pickupLocation}
+                            onChange={handleChange}
+                            placeholder="Enter pickup location address"
+                            required
+                        />
+                    </div>
+                    <label>Destination Address</label>
+                    <div className="form-group">
+                        
+                        <input
+                            type="text"
+                            name="destinationAddress"
+                            value={inputs.destinationAddress}
+                            onChange={handleChange}
+                            placeholder="Enter destination address"
+                            required
+                        />
+                    </div>
+
+                    <button type="submit" className="submit-button">Assign Delivery Agent</button>
+                </form>
+            </div>
         </div>
     );
 }

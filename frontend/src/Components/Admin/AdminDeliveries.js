@@ -115,6 +115,8 @@ function AdminDeliveries() {
                                 <div className="detail-group">
                                     <h4>Delivery Information</h4>
                                     <p><strong>Delivery Agent:</strong> {delivery.deliveryAgentId?.username || 'N/A'}</p>
+                                    <p><strong>Pickup Location:</strong> {delivery.pickupLocation || 'N/A'}</p>
+                                    <p><strong>Destination Address:</strong> {delivery.destinationAddress || 'N/A'}</p>
                                     <p><strong>Pickup Time:</strong> {delivery.pickupTime ? new Date(delivery.pickupTime).toLocaleString() : "Not yet picked up"}</p>
                                     <p><strong>Delivery Time:</strong> {delivery.deliveryTime ? new Date(delivery.deliveryTime).toLocaleString() : "Not yet delivered"}</p>
                                 </div>
