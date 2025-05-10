@@ -1,9 +1,28 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Nav from "../Nav/Nav";
-import Delivery from "./Delivery";
-import "../../App.css";
+import "./Delivery.css";
 import { Link, useNavigate } from "react-router-dom";
+
+// Add styles at the top of the file
+const styles = {
+    locationInfo: {
+        backgroundColor: '#f8f9fa',
+        padding: '10px',
+        borderRadius: '5px',
+        margin: '10px 0',
+        border: '1px solid #e9ecef'
+    },
+    locationLabel: {
+        fontWeight: 'bold',
+        color: '#495057',
+        marginBottom: '5px'
+    },
+    locationValue: {
+        color: '#212529',
+        wordBreak: 'break-word'
+    }
+};
 
 function DeliveryDetails() {
     const [deliveries, setDeliveries] = useState([]);
@@ -101,7 +120,7 @@ function DeliveryDetails() {
                 <div className="deliveries-search-box">
                     <input
                         type="text"
-                        placeholder="Search by food type or donor..."
+                        placeholder="Search by food type, donor, or location..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="deliveries-search-input"
@@ -149,6 +168,14 @@ function DeliveryDetails() {
                                 <div className="delivery-item">
                                     <span className="delivery-label">Donor</span>
                                     <span className="delivery-value">{delivery.donationId?.donorId?.username || 'N/A'}</span>
+                                </div>
+                                <div style={styles.locationInfo}>
+                                    <div style={styles.locationLabel}>Pickup Location</div>
+                                    <div style={styles.locationValue}>{delivery.pickupLocation || 'N/A'}</div>
+                                </div>
+                                <div style={styles.locationInfo}>
+                                    <div style={styles.locationLabel}>Destination Address</div>
+                                    <div style={styles.locationValue}>{delivery.destinationAddress || 'N/A'}</div>
                                 </div>
                                 <div className="delivery-item">
                                     <span className="delivery-label">Pickup Time</span>
